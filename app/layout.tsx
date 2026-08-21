@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,6 +33,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <Script
+          src="https://nexus.sisda.my/widget.js"
+          data-project="22222222-2222-2222-2222-222222222222"
+          data-key="nxai_widget_test123"
+          data-agent="b1160157-2af5-4d5d-8341-17eee18c8610"
+          strategy="lazyOnload"
+        />
       </body>
     </html>
   );
