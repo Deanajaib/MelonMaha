@@ -267,19 +267,10 @@
 }
 
 
-/* Chatbot widget position — above bottom navigation */
-/* Target all possible widget containers injected by nexus.sisda.my */
-[data-nexus-widget],
-.nexus-widget-container,
-iframe[src*="nexus.sisda.my"],
-div[style*="position: fixed"][style*="bottom"],
-div[style*="position:fixed"][style*="bottom"] {
-  bottom: 85px !important;
-}
-/* Broader catch: any fixed-position element in bottom-right that isn't ours */
-body > div:not(.show):not([id^="__"]) {
-  bottom: 85px !important;
-}
-body > iframe[style*="bottom"] {
-  bottom: 85px !important;
+/* Chatbot widget — positioned via JS (shadow DOM prevents CSS override) */
+#nexusai-widget-root {
+  position: fixed !important;
+  bottom: 80px !important;
+  right: 20px !important;
+  z-index: 2147483647 !important;
 }
