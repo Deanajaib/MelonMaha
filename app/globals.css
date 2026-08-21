@@ -267,10 +267,6 @@
 }
 
 
-/* Chatbot widget — positioned via JS (shadow DOM prevents CSS override) */
-#nexusai-widget-root {
-  position: fixed !important;
-  bottom: 80px !important;
-  right: 20px !important;
-  z-index: 2147483647 !important;
-}
+/* Accommodate chatbot widget in bottom-right — shift nav elements left */
+.scene-dots{right:90px}
+.chapter-nav{padding-right:2vw}

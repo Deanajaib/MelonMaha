@@ -304,20 +304,6 @@ export default function Home() {
     const move = (e: PointerEvent) => setCursor({ x: e.clientX, y: e.clientY });
     window.addEventListener("pointermove", move); return () => window.removeEventListener("pointermove", move);
   }, []);
-  // Reposition nexus chatbot widget above bottom navigation
-  useEffect(() => {
-    const reposition = () => {
-      const root = document.getElementById("nexusai-widget-root");
-      if (root) {
-        root.style.cssText = "position:fixed;bottom:80px;right:20px;z-index:2147483647;";
-      }
-    };
-    // Check immediately and observe for late injection
-    reposition();
-    const observer = new MutationObserver(reposition);
-    observer.observe(document.body, { childList: true, subtree: false });
-    return () => observer.disconnect();
-  }, []);
 
 
   const enterFullscreen = async () => {
