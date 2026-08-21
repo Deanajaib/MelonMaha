@@ -2,18 +2,53 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import SceneThreeAnalytics from "./scene-three-analytics";
 
 const scenes = [
-  { id: "see", number: "01", label: "SEE", kicker: "The visible layer", title: <>What do you see<br />in a melon?</>, body: "A fruit. A colour. A familiar shape. But the surface is only the beginning." },
-  { id: "know", number: "02", label: "KNOW", kicker: "The intelligence layer", title: <>When we know more,<br />we see more.</>, body: "Agricultural data turns the melon into signals: origin, season, grade, movement and opportunity." },
-  { id: "build", number: "03", label: "BUILD / KIRO", kicker: "The making layer", title: <>From raw signals<br />to a digital experience.</>, body: "We connect data, interface and story — then make the invisible understandable." },
-  { id: "play", number: "04", label: "PLAY", kicker: "The participation layer", title: <>Don’t just watch.<br />Try it.</>, body: "A local mini-game gives the room a playful way to explore sorting, timing and choice." },
-  { id: "ask", number: "05", label: "ASK / QUICK", kicker: "The conversation layer", title: <>Ask the data.<br />Get to the point.</>, body: "A live Quick demo can take over here. If connectivity fails, the rehearsed fallback keeps the story moving." },
-  { id: "experience", number: "06", label: "EXPERIENCE / MAHA", kicker: "The human layer", title: <>Data becomes meaning<br />when people experience it.</>, body: "The finale opens into MAHA: full-screen film, sound and the people behind the agricultural ecosystem." },
+  { id: "see", number: "01", label: "SEE", kicker: "Start with the surface", title: <>What do you see<br />in a melon?</>, body: "At first, we see a familiar fruit—its shape, colour and texture. But there is more here than meets the eye." },
+  { id: "know", number: "02", label: "KNOW", kicker: "Look beneath the surface", title: <>Every melon<br />carries information.</>, body: "We can learn where it came from, when it was harvested, how it was graded and how it moves through the supply chain." },
+  { id: "build", number: "03", label: "BUILD / KIRO", kicker: "Turn information into action", title: <>From data, we see<br />the bigger picture.</>, body: "With Kiro, approved agricultural data can reveal growing areas and show how prices move over time." },
+  { id: "melon-theme", number: "04", label: "MELON / MAHA", kicker: "Why melon at MAHA?", title: <>One fruit.<br />Many stories to discover.</>, body: "Melon is a central theme at MAHA 2026—inviting visitors to discover its varieties, origins and the information behind every fruit." },
+  { id: "problem", number: "05", label: "PROBLEM / SOLUTION", kicker: "From problem to solution", title: <>A clear problem.<br />A focused idea.</>, body: "How do we share melon information and spark visitor interest at MAHA? We turned that question into a plan—discussed it with Kiro, then translated the idea into a game and a dedicated melon dashboard so visitors can explore and play at the same time." },
+  { id: "ask", number: "06", label: "ASK / DASHBOARD", kicker: "Move from search to conversation", title: <>Ask a clear question.<br />See the data clearly.</>, body: "Melon Supply Intelligence brings melon information into one interactive dashboard for a clearer conversation." },
+  { id: "play", number: "07", label: "PLAY", kicker: "Learn by doing", title: <>Now, let’s put it<br />to the test.</>, body: "This interactive game turns sorting, timing and decision-making into a simple hands-on experience." },
+  { id: "experience", number: "08", label: "EXPERIENCE / MAHA", kicker: "Bring technology back to people", title: <>The story continues<br />beyond the screen.</>, body: "At MAHA, digital tools become part of a wider experience—connecting information, agriculture and people." },
 ] as const;
 
-function MelonCanvas({ intensity = 1 }: { intensity?: number }) {
+const problemFlow = [
+  { id: "problem", tag: "PROBLEM", title: "Engage the visitor", body: "How do we share melon information and spark real interest during MAHA?" },
+  { id: "idea", tag: "IDEA", title: "Explore + play", body: "Let visitors discover melon data while having fun—learning by doing." },
+  { id: "kiro", tag: "KIRO", title: "Plan with Kiro", body: "We discussed the idea with Kiro and shaped it into a clear build plan." },
+  { id: "output", tag: "OUTPUT", title: "Dashboard + games", body: "A dedicated melon dashboard and interactive games, delivered together." },
+] as const;
+
+const melonInsights = [
+  { id: "commodity", icon: "ID", label: "Commodity name", sublabel: "Nama komoditi", position: "bottom-left" },
+  { id: "origin", icon: "⌖", label: "Origin", sublabel: "Asal", position: "top-left" },
+  { id: "grade", icon: "◇", label: "Grade", sublabel: "Gred", position: "top-right" },
+  { id: "maturity", icon: "◉", label: "Maturity index", sublabel: "Indeks kematangan", position: "mid-left" },
+  { id: "size", icon: "↔", label: "Size", sublabel: "Saiz", position: "mid-right" },
+] as const;
+
+const gameCards = [
+  { id: "tap", image: "/assets/game-tap-fruits.webp", title: "Tap The Fruits", meta: "Action · 60 sec" },
+  { id: "grab", image: "/assets/game-grab-fruits.webp", title: "Grab The Fruits", meta: "Racing · Fuel challenge" },
+  { id: "market", image: "/assets/game-buy-sell.webp", title: "Buy & Sell Simulation", meta: "Strategy · 3 min" },
+] as const;
+
+const mahaYouTubeUrl = "https://www.youtube.com/embed/ni3vYEiDPzA?autoplay=0&loop=1&playlist=ni3vYEiDPzA&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&cc_load_policy=0&cc_lang_pref=en";
+const mahaOfficialUrl = "https://mahaofficial.com.my/";
+const mahaQrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(mahaOfficialUrl)}&size=600&margin=2&dark=06140f&light=ffffff&ecLevel=H`;
+const melonSupplyIntelligenceUrl = "https://pantauharga.vercel.app/Melon-MAHA2026-v2.html";
+
+function MelonCanvas({ scanning = false, active = true }: { scanning?: boolean; active?: boolean }) {
   const mountRef = useRef<HTMLDivElement>(null);
+  const scanningRef = useRef(scanning);
+  const activeRef = useRef(active);
+
+  useEffect(() => { scanningRef.current = scanning; }, [scanning]);
+  useEffect(() => { activeRef.current = active; }, [active]);
 
   useEffect(() => {
     if (!mountRef.current) return;
@@ -26,87 +61,242 @@ function MelonCanvas({ intensity = 1 }: { intensity?: number }) {
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 100);
     camera.position.set(0, 0, 6.2);
-    const geometry = new THREE.SphereGeometry(1.72, 160, 120);
-    geometry.scale(1, 0.93, 1);
-    const material = new THREE.ShaderMaterial({
-      uniforms: {
-        uTime: { value: 0 },
-        uLight: { value: new THREE.Vector3(-2.4, 3.2, 4.5).normalize() },
-        uIntensity: { value: intensity },
-      },
-      vertexShader: `
-        varying vec3 vNormal; varying vec3 vPosition; varying vec2 vUv;
-        uniform float uTime;
-        float hash(vec3 p){ return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453); }
-        void main(){
-          vUv=uv; vec3 p=position; float pores=(hash(floor(p*42.0))-0.5)*0.018;
-          p += normal*pores; vNormal=normalize(normalMatrix*normal); vPosition=(modelViewMatrix*vec4(p,1.)).xyz;
-          gl_Position=projectionMatrix*modelViewMatrix*vec4(p,1.);
-        }`,
-      fragmentShader: `
-        varying vec3 vNormal; varying vec3 vPosition; varying vec2 vUv;
-        uniform vec3 uLight; uniform float uTime; uniform float uIntensity;
-        float hash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }
-        float noise(vec2 p){ vec2 i=floor(p),f=fract(p); f=f*f*(3.-2.*f); return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1)),f.x),f.y); }
-        float fbm(vec2 p){ float v=0.,a=.5; for(int i=0;i<5;i++){v+=a*noise(p);p=p*2.03+11.7;a*=.5;}return v;}
-        void main(){
-          vec2 p=vec2(vUv.x*20.,vUv.y*13.); float a=fbm(p); float b=fbm(p*1.7+8.);
-          float web=smoothstep(.48,.60,abs(a-b)+.32*fbm(p*3.));
-          float pores=smoothstep(.78,.88,noise(p*7.));
-          vec3 rind=mix(vec3(.55,.36,.08),vec3(.88,.67,.24),fbm(p*.7));
-          vec3 skin=mix(rind,vec3(.91,.79,.48),web*.82); skin*=1.-pores*.24;
-          vec3 n=normalize(vNormal+vec3((a-b)*.19)); float diff=max(dot(n,uLight),0.);
-          float rim=pow(1.-max(dot(n,normalize(-vPosition)),0.),2.5);
-          float spec=pow(max(dot(reflect(-uLight,n),normalize(-vPosition)),0.),38.)*.18;
-          vec3 color=skin*(.22+diff*.86)+vec3(1.,.68,.25)*rim*.34+spec;
-          color=mix(color,color*vec3(.85,1.02,.91),clamp(uIntensity-1.,0.,1.)*.25);
-          gl_FragColor=vec4(color,1.);
-        }`,
-    });
-    const melon = new THREE.Mesh(geometry, material);
-    melon.rotation.z = -0.08;
+    const melon = new THREE.Group();
     scene.add(melon);
+    let loadedModel: THREE.Object3D | null = null;
+    const scanShell = new THREE.Group();
+    const scanMaterials: THREE.ShaderMaterial[] = [];
+    melon.add(scanShell);
+    const loader = new GLTFLoader();
+    loader.load("/assets/earls-favourite-melon.glb", (gltf) => {
+      loadedModel = gltf.scene;
+      const box = new THREE.Box3().setFromObject(loadedModel);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      const fit = 3.45 / Math.max(size.x, size.y, size.z);
+      loadedModel.position.copy(center).multiplyScalar(-1);
+      const centeredModel = new THREE.Group();
+      centeredModel.scale.setScalar(fit);
+      centeredModel.rotation.z = -.08;
+      centeredModel.add(loadedModel);
+      loadedModel.traverse((object) => {
+        if (object instanceof THREE.Mesh) {
+          object.castShadow = true; object.receiveShadow = true;
+          const materials = Array.isArray(object.material) ? object.material : [object.material];
+          materials.forEach((mat) => {
+            if (mat instanceof THREE.MeshStandardMaterial) {
+              mat.envMapIntensity = 1.25; mat.roughness = Math.min(.82, mat.roughness + .08);
+              if (mat.map) { mat.map.anisotropy = renderer.capabilities.getMaxAnisotropy(); mat.map.needsUpdate = true; }
+            }
+          });
+        }
+      });
+      melon.add(centeredModel);
+
+      const wireSource = loadedModel.clone(true);
+      wireSource.traverse((object) => {
+        if (object instanceof THREE.Mesh) {
+          const wireMaterial = new THREE.ShaderMaterial({
+            uniforms: {
+              uTime: { value: 0 },
+              uActive: { value: scanningRef.current ? 1 : 0 },
+            },
+            wireframe: true,
+            transparent: true,
+            depthWrite: false,
+            blending: THREE.AdditiveBlending,
+            polygonOffset: true,
+            polygonOffsetFactor: -1,
+            vertexShader: `
+              varying float vWorldY;
+              void main(){
+                vec4 worldPosition = modelMatrix * vec4(position, 1.0);
+                vWorldY = worldPosition.y;
+                gl_Position = projectionMatrix * viewMatrix * worldPosition;
+              }
+            `,
+            fragmentShader: `
+              varying float vWorldY;
+              uniform float uTime;
+              uniform float uActive;
+              void main(){
+                float travel = 0.5 + 0.5 * sin(uTime * 3.14159265 - 1.5707963);
+                float scanY = mix(-1.85, 1.85, travel);
+                float band = exp(-pow((vWorldY - scanY) * 8.0, 2.0));
+                float pulse = 0.78 + 0.22 * sin(uTime * 5.5);
+                vec3 base = vec3(0.18, 0.72, 0.58);
+                vec3 hot = vec3(0.72, 1.0, 0.9);
+                vec3 color = mix(base, hot, band);
+                float alpha = uActive * (0.22 * pulse + band * 0.78);
+                gl_FragColor = vec4(color, alpha);
+              }
+            `,
+          });
+          scanMaterials.push(wireMaterial);
+          object.material = wireMaterial;
+          object.renderOrder = 4;
+        }
+      });
+      const centeredWire = new THREE.Group();
+      centeredWire.scale.setScalar(fit * 1.003);
+      centeredWire.rotation.z = -.08;
+      centeredWire.add(wireSource);
+      scanShell.add(centeredWire);
+    });
+
+    scene.add(new THREE.HemisphereLight(0xcaffed, 0x101008, 2.1));
+    const keyLight = new THREE.DirectionalLight(0xfff4d2, 4.2); keyLight.position.set(-3.5, 4.2, 5); scene.add(keyLight);
+    const rimLight = new THREE.DirectionalLight(0x66ffd0, 3.3); rimLight.position.set(4, 1, -3); scene.add(rimLight);
+
+    const particleGeometry = new THREE.BufferGeometry();
+    const particleCount = 520;
+    const positions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+      const radius = 2.4 + Math.random() * 3.8;
+      const theta = Math.random() * Math.PI * 2;
+      const phi = Math.acos(2 * Math.random() - 1);
+      positions[i*3] = radius * Math.sin(phi) * Math.cos(theta);
+      positions[i*3+1] = radius * Math.cos(phi);
+      positions[i*3+2] = radius * Math.sin(phi) * Math.sin(theta);
+    }
+    particleGeometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    const particles = new THREE.Points(particleGeometry, new THREE.PointsMaterial({ color: 0xb9ffdf, size: .014, transparent: true, opacity: .44 }));
+    scene.add(particles);
 
     const resize = () => {
       const { clientWidth: w, clientHeight: h } = host;
       renderer.setSize(w, h, false); camera.aspect = w / Math.max(h, 1); camera.updateProjectionMatrix();
     };
     resize(); window.addEventListener("resize", resize);
-    const clock = new THREE.Clock(); let frame = 0;
-    const tick = () => { frame = requestAnimationFrame(tick); const t=clock.getElapsedTime(); material.uniforms.uTime.value=t; material.uniforms.uIntensity.value=intensity; melon.rotation.y=t*.075; melon.rotation.x=Math.sin(t*.24)*.035; renderer.render(scene,camera); };
+    const clock = new THREE.Clock(); let frame = 0; let idleTimer = 0;
+    const tick = () => {
+      const t=clock.getElapsedTime();
+      if (activeRef.current) {
+        melon.position.set(0, 0, 0);
+        melon.scale.setScalar(1);
+        melon.rotation.set(0, t*.11, 0);
+        scanMaterials.forEach((material) => {
+          material.uniforms.uTime.value = t;
+          material.uniforms.uActive.value += ((scanningRef.current ? 1 : 0) - material.uniforms.uActive.value) * .12;
+        });
+        particles.rotation.y=t*.009;
+        camera.lookAt(0,0,0); renderer.render(scene,camera);
+        frame = requestAnimationFrame(tick);
+      } else {
+        idleTimer = window.setTimeout(tick, 180);
+      }
+    };
     tick();
-    return () => { cancelAnimationFrame(frame); window.removeEventListener("resize", resize); geometry.dispose(); material.dispose(); renderer.dispose(); renderer.domElement.remove(); };
-  }, [intensity]);
-  return <div className="melon-canvas" ref={mountRef} aria-label="Procedural 3D rock melon" />;
+    return () => { cancelAnimationFrame(frame); window.clearTimeout(idleTimer); window.removeEventListener("resize", resize); loadedModel?.traverse((object) => { if (object instanceof THREE.Mesh) { object.geometry?.dispose(); const materials=Array.isArray(object.material)?object.material:[object.material]; materials.forEach((mat:THREE.Material)=>mat.dispose()); } }); scanMaterials.forEach((material)=>material.dispose()); particleGeometry.dispose(); (particles.material as THREE.Material).dispose(); renderer.dispose(); renderer.domElement.remove(); };
+  }, []);
+  return <div className={`melon-canvas ${scanning ? "scan-active" : ""}`} ref={mountRef} aria-label="Interactive 3D rock melon model" />;
 }
 
 export default function Home() {
   const [active, setActive] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [quickOpen, setQuickOpen] = useState(false);
+  const [externalPopup, setExternalPopup] = useState<{ title: string; url: string } | null>(null);
+  const [externalReady, setExternalReady] = useState(false);
   const [finale, setFinale] = useState(false);
-  const [muted, setMuted] = useState(true);
+  const [finaleVideoReady, setFinaleVideoReady] = useState(false);
+  const [finaleTransitioning, setFinaleTransitioning] = useState(false);
   const [fullscreen, setFullscreen] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [scanConfirmed, setScanConfirmed] = useState(false);
+  const [scanComplete, setScanComplete] = useState(false);
+  const [cursor, setCursor] = useState({ x: -100, y: -100 });
+  const scanTimers = useRef<number[]>([]);
+  const finaleTimer = useRef<number | null>(null);
+  const finalePlayer = useRef<HTMLIFrameElement>(null);
   const scene = scenes[active];
+  const openExternalPopup = useCallback((title: string, url: string) => {
+    setExternalReady(false);
+    setExternalPopup({ title, url });
+  }, []);
+
+  const runScan = useCallback(() => {
+    if (scanning) return;
+    scanTimers.current.forEach(window.clearTimeout);
+    scanTimers.current = [];
+    setScanComplete(false);
+    setScanConfirmed(false);
+    setScanning(true);
+    scanTimers.current.push(window.setTimeout(() => {
+      setActive(1);
+      setScanning(false);
+      setScanConfirmed(true);
+    }, 2100));
+    scanTimers.current.push(window.setTimeout(() => {
+      setScanConfirmed(false);
+      setScanComplete(true);
+    }, 2850));
+  }, [scanning]);
+
+  const launchFinale = useCallback(() => {
+    if (finale || finaleTransitioning) return;
+    const sendPlayerCommand = (func: string, args: unknown[] = []) => finalePlayer.current?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args }), "https://www.youtube.com");
+    sendPlayerCommand("unloadModule", ["captions"]);
+    sendPlayerCommand("unloadModule", ["cc"]);
+    sendPlayerCommand("seekTo", [0, true]);
+    sendPlayerCommand("unMute");
+    sendPlayerCommand("setVolume", [100]);
+    sendPlayerCommand("playVideo");
+    setFinaleTransitioning(true);
+    if (finaleTimer.current) window.clearTimeout(finaleTimer.current);
+    finaleTimer.current = window.setTimeout(() => {
+      setFinale(true);
+      setFinaleTransitioning(false);
+      finaleTimer.current = null;
+    }, 820);
+  }, [finale, finaleTransitioning]);
+
+  const closeFinale = useCallback(() => {
+    const sendPlayerCommand = (func: string, args: unknown[] = []) => finalePlayer.current?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args }), "https://www.youtube.com");
+    sendPlayerCommand("pauseVideo");
+    sendPlayerCommand("seekTo", [0, true]);
+    setFinale(false);
+  }, []);
 
   const go = useCallback((next: number) => {
-    setFinale(false); setQuickOpen(false); setActive(Math.max(0, Math.min(scenes.length - 1, next)));
+    if (active === scenes.length - 1 && next > active) { launchFinale(); return; }
+    const target = Math.max(0, Math.min(scenes.length - 1, next));
+    if (target === 1 && active !== 1) { runScan(); return; }
+    scanTimers.current.forEach(window.clearTimeout);
+    scanTimers.current = [];
+    setFinale(false); setActive(target);
+    if (target < 6) setFinaleVideoReady(false);
+    if (target !== 1) { setScanning(false); setScanConfirmed(false); setScanComplete(false); }
+  }, [active, launchFinale, runScan]);
+
+  useEffect(() => () => {
+    scanTimers.current.forEach(window.clearTimeout);
+    if (finaleTimer.current) window.clearTimeout(finaleTimer.current);
   }, []);
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      if (externalPopup) {
+        if (event.key === "Escape") setExternalPopup(null);
+        return;
+      }
+      if (finale && !["Escape", "v", "V"].includes(event.key)) return;
       if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); go(active + 1); }
       if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); go(active - 1); }
       if (event.key === "Home") go(0);
       if (event.key === "End") go(scenes.length - 1);
-      if (/^[1-6]$/.test(event.key)) go(Number(event.key) - 1);
-      if (event.key.toLowerCase() === "q") setQuickOpen(v => !v);
-      if (event.key.toLowerCase() === "v") setFinale(v => !v);
+      if (/^[1-8]$/.test(event.key)) go(Number(event.key) - 1);
+      if (event.key.toLowerCase() === "q") openExternalPopup("MELON SUPPLY INTELLIGENCE · MAHA 2026", melonSupplyIntelligenceUrl);
+      if (event.key.toLowerCase() === "v") { if (finale) closeFinale(); else launchFinale(); }
       if (event.key.toLowerCase() === "f") document.documentElement.requestFullscreen?.();
-      if (event.key === "Escape") { setQuickOpen(false); setFinale(false); setMenuOpen(false); }
+      if (event.key === "Escape") { if (finale) closeFinale(); setMenuOpen(false); }
     };
     window.addEventListener("keydown", onKey); return () => window.removeEventListener("keydown", onKey);
-  }, [active, go]);
+  }, [active, closeFinale, externalPopup, finale, go, launchFinale, openExternalPopup]);
+
+  useEffect(() => {
+    const move = (e: PointerEvent) => setCursor({ x: e.clientX, y: e.clientY });
+    window.addEventListener("pointermove", move); return () => window.removeEventListener("pointermove", move);
+  }, []);
 
   const enterFullscreen = async () => {
     if (!document.fullscreenElement) { await document.documentElement.requestFullscreen?.(); setFullscreen(true); }
@@ -114,34 +304,92 @@ export default function Home() {
   };
 
   return (
-    <main className={`show scene-${scene.id}`}>
+    <main className={`show scene-${scene.id} ${finaleTransitioning ? "finale-transitioning" : ""}`}>
+      <div className="cursor-core" style={{ transform: `translate3d(${cursor.x}px,${cursor.y}px,0)` }} />
       <div className="grain" />
+      <div className="grid-plane" />
+      <div className="ambient-beam" />
       <header className="topbar">
-        <button className="brand" onClick={() => go(0)} aria-label="Back to opening"><span className="brand-mark">F</span><span>FAMA · DIGITAL EXPERIENCE</span></button>
+        <button className="brand" onClick={() => go(0)} aria-label="Back to opening"><span className="brand-mark"><img src="/assets/fama-logo.png" alt="" /></span><span>FAMA · DIGITAL EXPERIENCE</span></button>
         <div className="top-actions">
-          <span className="status-dot" /> <span className="desktop-only">PRESENTATION READY</span>
+          <span className="status-dot" /> <span className="desktop-only">PRESENTATION MODE</span>
           <button className="icon-button" onClick={enterFullscreen} aria-label="Toggle fullscreen">{fullscreen ? "↙" : "↗"}</button>
           <button className="icon-button" onClick={() => setMenuOpen(v => !v)} aria-label="Open scene menu">☰</button>
         </div>
       </header>
 
+      <div className="side-rail" aria-hidden="true"><span>FAMA / DX-01</span><i/><span>INTERACTIVE STORY</span></div>
       <section className="stage" aria-live="polite">
         <div className="copy-panel" key={scene.id}>
-          <p className="eyebrow"><span>{scene.number}</span>{scene.kicker}</p>
+          <p className="eyebrow"><span>{scene.number}</span>{scene.kicker}<i>● LIVE</i></p>
           <h1>{scene.title}</h1>
           <p className="lead">{scene.body}</p>
-          {scene.id === "know" && <div className="signal-row"><span>ORIGIN <b>PLACEHOLDER</b></span><span>GRADE <b>—</b></span><span>SEASON <b>—</b></span></div>}
-          {scene.id === "build" && <div className="pipeline"><span>DATA</span><i>→</i><span>KIRO</span><i>→</i><span>EXPERIENCE</span></div>}
-          {scene.id === "play" && <button className="primary" onClick={() => alert("LOCAL GAME INTEGRATION POINT\n\nReplace this handler with the final local game URL or embedded component.")}>Launch local game <b>↗</b></button>}
-          {scene.id === "ask" && <button className="primary" onClick={() => setQuickOpen(true)}>Open Quick demo <b>Q</b></button>}
-          {scene.id === "experience" && <button className="primary" onClick={() => setFinale(true)}>Play MAHA finale <b>V</b></button>}
+          {scene.id === "build" && <div className="pipeline"><span>LOCATION</span><i>→</i><span>KIRO</span><i>→</i><span>PRICE TREND</span></div>}
+          {scene.id === "play" && <button className="primary game-cta" onClick={() => openExternalPopup("SISDA GAMES", "https://gamesv2.sisda.my/")}>Open Sisda Games <b>↗</b></button>}
+          {scene.id === "ask" && <button className="primary" onClick={() => openExternalPopup("MELON SUPPLY INTELLIGENCE · MAHA 2026", melonSupplyIntelligenceUrl)}>Open Melon Supply Intelligence <b>Q</b></button>}
+          {scene.id === "experience" && <button className="primary" onClick={launchFinale} disabled={finaleTransitioning}>Play the MAHA finale <b>V</b></button>}
         </div>
-        <div className="visual-panel">
+        <div className={`visual-panel ${scanComplete && active === 1 ? "insights-visible" : ""} ${scene.id === "build" ? "map-mode" : ""} ${scene.id === "melon-theme" ? "theme-mode" : ""} ${scene.id === "play" ? "game-mode" : ""} ${scene.id === "ask" ? "dashboard-mode" : ""} ${scene.id === "experience" ? "experience-mode" : ""} ${scene.id === "problem" ? "problem-mode" : ""}`}>
+          <div className={`scan-layer ${scanning ? "active" : ""}`}><i/><span>SCANNING 3D SURFACE</span></div>
+          <div className="hud-corner tl"/><div className="hud-corner tr"/><div className="hud-corner bl"/><div className="hud-corner br"/>
           <div className="orbit orbit-one"/><div className="orbit orbit-two"/>
-          <MelonCanvas intensity={active > 0 ? 1.25 : 1} />
+          {active <= 2 && <MelonCanvas scanning={scanning} active={active <= 1 || scanning} />}
           <div className="melon-shadow" />
-          <p className="spec-label left">PROCEDURAL<br/>SPHERE GEOMETRY</p>
-          <p className="spec-label right">PBR-STYLE<br/>SURFACE SHADER</p>
+          {scene.id === "problem" && <section className="problem-flow" aria-label="Problem to solution process">
+            <div className="problem-flow-head"><span>OUR PROCESS</span><b>IDEA → BUILD</b></div>
+            <div className="problem-flow-track">
+              {problemFlow.map((step, index) => <div key={step.id} className={`flow-node flow-${step.id}`} style={{ "--delay": `${index * 0.16}s` } as React.CSSProperties}>
+                <span className="flow-tag">{step.tag}</span>
+                <strong>{step.title}</strong>
+                <small>{step.body}</small>
+                {index < problemFlow.length - 1 && <span className="flow-arrow" aria-hidden="true">→</span>}
+              </div>)}
+            </div>
+            <p className="problem-flow-foot">From idea to output—planned with Kiro, delivered as a dashboard and games.</p>
+          </section>}
+          {scene.id === "build" && <SceneThreeAnalytics />}
+          {scene.id === "play" && <section className="game-showcase" aria-label="Sisda mini games">
+            <div className="game-showcase-head"><span>03 PLAYABLE EXPERIENCES</span><b>BUILT WITH KIRO</b></div>
+            <div className="game-card-grid">
+              {gameCards.map((game, index) => <button key={game.id} className={`game-preview game-${game.id}`} onClick={() => openExternalPopup(game.title.toUpperCase(), "https://gamesv2.sisda.my/")} style={{ animationDelay: `${150 + index * 150}ms` }}>
+                <img src={game.image} alt={`${game.title} game card`} decoding="async" />
+                <span><strong>{game.title}</strong><small>{game.meta}</small></span>
+                <i>↗</i>
+              </button>)}
+            </div>
+            <button className="game-platform-link" onClick={() => openExternalPopup("SISDA GAMES", "https://gamesv2.sisda.my/")}><span>ENTER THE FULL GAME PLATFORM</span><b>gamesv2.sisda.my ↗</b></button>
+          </section>}
+          {scene.id === "ask" && <section className="dashboard-showcase" aria-label="Melon Supply Intelligence dashboard preview">
+            <div className="dashboard-preview-head"><span>LIVE DASHBOARD</span><b>MELON SUPPLY INTELLIGENCE · MAHA 2026</b></div>
+            <div className="dashboard-preview-frame"><iframe src={melonSupplyIntelligenceUrl} title="Melon Supply Intelligence MAHA 2026 dashboard preview" tabIndex={-1}/><i/></div>
+            <button onClick={() => openExternalPopup("MELON SUPPLY INTELLIGENCE · MAHA 2026", melonSupplyIntelligenceUrl)}><span>OPEN INTERACTIVE DASHBOARD</span><b>↗</b></button>
+          </section>}
+          {(scene.id === "melon-theme" || scene.id === "experience") && <section className="maha-poster-stage" aria-label={scene.id === "melon-theme" ? "MAHA 2026 melon theme poster" : "MAHA 2026 finale poster"}>
+            <div className="poster-halo" />
+            <div className="maha-poster-frame">
+              <div className="maha-poster-art"><img src="/assets/maha-2026-poster.webp" alt="MAHA 2026, 28 August to 6 September 2026 at MAEPS Serdang, Selangor" decoding="async" /></div>
+              <i className="poster-sweep" />
+            </div>
+            {scene.id === "experience" && <a className="maha-qr-card" href={mahaOfficialUrl} target="_blank" rel="noreferrer" aria-label="Scan or open the official MAHA website">
+              <span>MAKLUMAT LANJUT</span>
+              <strong>Discover more<br/>about MAHA</strong>
+              <img src={mahaQrUrl} alt="QR code to mahaofficial.com.my" />
+              <small>SCAN QR · MAHAOFFICIAL.COM.MY</small>
+            </a>}
+            <div className="maha-poster-meta"><span>{scene.id === "melon-theme" ? "MAHA 2026 · MELON THEME" : "MAHA 2026"}</span><b>{scene.id === "melon-theme" ? "DISCOVER THE MELONS BEHIND THE DATA" : "THE EXPERIENCE CONTINUES"}</b></div>
+          </section>}
+          <p className="spec-label left">REAL 3D<br/>MELON MODEL</p>
+          <p className="spec-label right">DETAILED PBR<br/>SURFACE TEXTURE</p>
+          <button className="scan-button" onClick={runScan} disabled={scanning}><span>{scanning ? "SCANNING" : scanComplete ? "RESCAN" : "SCAN"}</span><i>{scanning ? "◉" : "◎"}</i></button>
+          <div className="telemetry"><span>ROTATION <b>AUTO</b></span><span>MODEL <b>CENTRED</b></span><span>SURFACE <b>{scanning ? "SCANNING" : "READY"}</b></span></div>
+          {scanConfirmed && active === 1 && <div className="scan-confirmation"><i>✓</i><span>SCAN COMPLETE</span><b>6 DATA FIELDS FOUND</b></div>}
+          <div className="insight-layer" aria-live="polite">
+            {melonInsights.map((item, index) => <article key={item.id} className={`insight-card ${item.position}`} style={{ animationDelay: `${index * 130}ms` }}>
+              <i className="connector" />
+              <span className="insight-icon">{item.icon}</span>
+              <div><small>{item.sublabel}</small><strong>{item.label}</strong></div>
+            </article>)}
+          </div>
         </div>
       </section>
 
@@ -149,18 +397,30 @@ export default function Home() {
         <button onClick={() => go(active - 1)} disabled={active === 0} aria-label="Previous scene">←</button>
         <div className="progress"><i style={{ width: `${((active + 1) / scenes.length) * 100}%` }} /></div>
         <span>{String(active + 1).padStart(2,"0")} / {String(scenes.length).padStart(2,"0")}</span>
-        <button onClick={() => go(active + 1)} disabled={active === scenes.length - 1} aria-label="Next scene">→</button>
+        <button onClick={() => go(active + 1)} disabled={finaleTransitioning} aria-label={active === scenes.length - 1 ? "Play finale video" : "Next scene"}>→</button>
       </nav>
+      <nav className="scene-dots" aria-label="Quick scene navigation">{scenes.map((item,index)=><button key={item.id} className={index===active?"active":""} onClick={()=>go(index)} aria-label={`Go to ${item.label}`}><i/><span>{item.label}</span></button>)}</nav>
 
       <aside className={`scene-menu ${menuOpen ? "open" : ""}`}>
         <button className="close" onClick={() => setMenuOpen(false)}>×</button><p>SCENE INDEX</p>
         {scenes.map((item, index) => <button key={item.id} className={index === active ? "active" : ""} onClick={() => { go(index); setMenuOpen(false); }}><span>{item.number}</span>{item.label}</button>)}
-        <small>← → navigate · 1–6 jump · F fullscreen<br/>Q Quick · V finale · Esc close</small>
+        <small>← → navigate · 1–8 jump · F fullscreen<br/>Q dashboard · V finale · Esc close</small>
       </aside>
 
-      {quickOpen && <div className="takeover quick-takeover"><div className="takeover-bar"><span>QUICK · LIVE DEMO HANDOFF</span><button onClick={() => setQuickOpen(false)}>×</button></div><div className="quick-terminal"><p className="eyebrow">CONNECTED EXPERIENCE / FALLBACK MODE</p><h2>What would you like<br/>to know about the melon?</h2><div className="prompt"><span>Ask Quick</span><em>“Show a verified insight when the final data source is connected.”</em><b>↗</b></div><p className="placeholder-note">DEMO FALLBACK — No live agricultural facts are shown in this scaffold. Replace with the approved Quick endpoint and rehearsed responses.</p></div></div>}
+      {externalPopup && <div className={`external-popup ${externalReady ? "content-ready" : ""}`} role="dialog" aria-modal="true" aria-label={externalPopup.title}>
+        <button className="external-backdrop" onClick={() => setExternalPopup(null)} aria-label="Close popup" />
+        <section className="external-window">
+          <header><div><i/><span>{externalPopup.title}</span><small>LIVE EXPERIENCE</small></div><button onClick={() => setExternalPopup(null)} aria-label="Close popup">CLOSE ×</button></header>
+          <div className="external-loader"><i/><span>LOADING EXPERIENCE</span></div>
+          <iframe src={externalPopup.url} title={externalPopup.title} allow="fullscreen; autoplay" onLoad={() => setExternalReady(true)} />
+        </section>
+      </div>}
 
-      {finale && <div className="takeover finale"><video autoPlay loop muted={muted} playsInline poster=""><source src="/assets/maha-finale.mp4" type="video/mp4" /></video><div className="finale-fallback"><span>MAHA · FINALE</span><h2>Experience<br/>changes what<br/>we see.</h2><p>FINAL FULL-SCREEN VIDEO REQUIRED<br/>/public/assets/maha-finale.mp4</p></div><div className="finale-controls"><button onClick={() => setMuted(v => !v)}>{muted ? "UNMUTE" : "MUTE"}</button><button onClick={() => setFinale(false)}>CLOSE ×</button></div></div>}
+      <div className={`takeover finale ${finale ? "finale-open" : "finale-preloaded"} ${finaleVideoReady ? "video-ready" : ""}`} aria-hidden={!finale}>
+        <iframe ref={finalePlayer} src={active >= 6 ? mahaYouTubeUrl : "about:blank"} title="MAHA finale video" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen onLoad={() => { if (active >= 6) setFinaleVideoReady(true); }} />
+        <div className="finale-fallback"><span>MAHA · FINALE</span><h2>The story<br/>continues beyond<br/>the screen.</h2><p>LOADING MAHA FILM</p></div>
+        <div className="finale-controls"><span>AUDIO ON · YOUTUBE PLAYER</span><button onClick={closeFinale}>CLOSE ×</button></div>
+      </div>
     </main>
   );
 }

@@ -16,8 +16,8 @@ export const metadata: Metadata = {
   title: "What Do You See in a Melon? | FAMA",
   description: "From Agricultural Data to Digital Experience — an immersive FAMA presentation.",
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: "/favicon.svg?v=2",
+    shortcut: "/favicon.svg?v=2",
   },
 };
 
