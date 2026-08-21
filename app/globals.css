@@ -265,3 +265,11 @@
   .problem-flow-head{font-size:7px;height:32px}
   @keyframes flowNodeFloat{0%,100%{transform:none}50%{transform:none}}
 }
+
+
+/* Chatbot widget position — above bottom navigation */
+[data-nexus-widget],
+.nexus-widget-container,
+iframe[src*="nexus.sisda.my"] {
+  bottom: 80px !important;
+}

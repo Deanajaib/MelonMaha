@@ -275,6 +275,10 @@ export default function Home() {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      // Don't intercept keys when chatbot widget or any iframe/input has focus
+      const tag = (event.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "IFRAME" || (event.target as HTMLElement)?.isContentEditable) return;
+      if (document.activeElement?.tagName === "IFRAME") return;
       if (externalPopup) {
         if (event.key === "Escape") setExternalPopup(null);
         return;
