@@ -1,0 +1,4 @@
+work/
+.wrangler/
+node_modules/
+.kiro/
