@@ -41,6 +41,7 @@ const mahaYouTubeUrl = "https://www.youtube.com/embed/ni3vYEiDPzA?autoplay=0&loo
 const mahaOfficialUrl = "https://mahaofficial.com.my/";
 const mahaQrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(mahaOfficialUrl)}&size=600&margin=2&dark=06140f&light=ffffff&ecLevel=H`;
 const melonSupplyIntelligenceUrl = "https://pantauharga.vercel.app/Melon-MAHA2026-v2.html";
+const kiroDemoYouTubeUrl = "https://www.youtube.com/embed/lX-1suvdvqg?autoplay=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&cc_load_policy=0";
 
 function MelonCanvas({ scanning = false, active = true }: { scanning?: boolean; active?: boolean }) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -208,6 +209,7 @@ export default function Home() {
   const scanTimers = useRef<number[]>([]);
   const finaleTimer = useRef<number | null>(null);
   const finalePlayer = useRef<HTMLIFrameElement>(null);
+  const [kiroDemo, setKiroDemo] = useState(false);
   const scene = scenes[active];
   const openExternalPopup = useCallback((title: string, url: string) => {
     setExternalReady(false);
@@ -261,12 +263,13 @@ export default function Home() {
     if (active === scenes.length - 1 && next > active) { launchFinale(); return; }
     const target = Math.max(0, Math.min(scenes.length - 1, next));
     if (target === 1 && active !== 1) { runScan(); return; }
+    if (active === 4 && target === 5 && !kiroDemo) { setKiroDemo(true); return; }
     scanTimers.current.forEach(window.clearTimeout);
     scanTimers.current = [];
     setFinale(false); setActive(target);
     if (target < 6) setFinaleVideoReady(false);
     if (target !== 1) { setScanning(false); setScanConfirmed(false); setScanComplete(false); }
-  }, [active, launchFinale, runScan]);
+  }, [active, kiroDemo, launchFinale, runScan]);
 
   useEffect(() => () => {
     scanTimers.current.forEach(window.clearTimeout);
@@ -286,6 +289,7 @@ export default function Home() {
         if (event.key === "Escape") setExternalPopup(null);
         return;
       }
+      if (kiroDemo) { if (event.key === "Escape") setKiroDemo(false); return; }
       if (finale && !["Escape", "v", "V"].includes(event.key)) return;
       if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); go(active + 1); }
       if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); go(active - 1); }
@@ -298,7 +302,7 @@ export default function Home() {
       if (event.key === "Escape") { if (finale) closeFinale(); setMenuOpen(false); }
     };
     window.addEventListener("keydown", onKey); return () => window.removeEventListener("keydown", onKey);
-  }, [active, closeFinale, externalPopup, finale, go, launchFinale, openExternalPopup]);
+  }, [active, closeFinale, externalPopup, finale, go, kiroDemo, launchFinale, openExternalPopup]);
 
   useEffect(() => {
     const move = (e: PointerEvent) => setCursor({ x: e.clientX, y: e.clientY });
@@ -346,10 +350,11 @@ export default function Home() {
           {scene.id === "problem" && <section className="problem-flow" aria-label="Problem to solution process">
             <div className="problem-flow-head"><span>OUR PROCESS</span><b>IDEA → BUILD</b></div>
             <div className="problem-flow-track">
-              {problemFlow.map((step, index) => <div key={step.id} className={`flow-node flow-${step.id}`} style={{ "--delay": `${index * 0.16}s` } as React.CSSProperties}>
+              {problemFlow.map((step, index) => <div key={step.id} className={`flow-node flow-${step.id} ${step.id === "kiro" ? "flow-clickable" : ""}`} style={{ "--delay": `${index * 0.16}s` } as React.CSSProperties} onClick={step.id === "kiro" ? () => setKiroDemo(true) : undefined} role={step.id === "kiro" ? "button" : undefined} tabIndex={step.id === "kiro" ? 0 : undefined} aria-label={step.id === "kiro" ? "Watch Kiro demo video" : undefined}>
                 <span className="flow-tag">{step.tag}</span>
                 <strong>{step.title}</strong>
                 <small>{step.body}</small>
+                {step.id === "kiro" && <span className="flow-play-hint">▶ WATCH DEMO</span>}
                 {index < problemFlow.length - 1 && <span className="flow-arrow" aria-hidden="true">→</span>}
               </div>)}
             </div>
@@ -422,6 +427,14 @@ export default function Home() {
           <div className="external-loader"><i/><span>LOADING EXPERIENCE</span></div>
           <iframe src={externalPopup.url} title={externalPopup.title} allow="fullscreen; autoplay" onLoad={() => setExternalReady(true)} />
         </section>
+      </div>}
+
+      {kiroDemo && <div className="takeover kiro-demo" role="dialog" aria-modal="true" aria-label="Kiro demo video">
+        <iframe src={kiroDemoYouTubeUrl} title="Kiro demo — building with AI" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen />
+        <div className="kiro-demo-controls">
+          <span>KIRO DEMO · YOUTUBE</span>
+          <button onClick={() => setKiroDemo(false)}>CLOSE ×</button>
+        </div>
       </div>}
 
       <div className={`takeover finale ${finale ? "finale-open" : "finale-preloaded"} ${finaleVideoReady ? "video-ready" : ""}`} aria-hidden={!finale}>
