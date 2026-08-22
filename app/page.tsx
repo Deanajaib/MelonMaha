@@ -263,7 +263,10 @@ export default function Home() {
     if (active === scenes.length - 1 && next > active) { launchFinale(); return; }
     const target = Math.max(0, Math.min(scenes.length - 1, next));
     if (target === 1 && active !== 1) { runScan(); return; }
-    if (active === 4 && target === 5 && !kiroDemo) { setKiroDemo(true); return; }
+    if (active === 4 && target === 5) {
+      if (!kiroDemo) { setKiroDemo(true); return; }
+      setKiroDemo(false);
+    }
     scanTimers.current.forEach(window.clearTimeout);
     scanTimers.current = [];
     setFinale(false); setActive(target);
@@ -289,7 +292,11 @@ export default function Home() {
         if (event.key === "Escape") setExternalPopup(null);
         return;
       }
-      if (kiroDemo) { if (event.key === "Escape") setKiroDemo(false); return; }
+      if (kiroDemo) {
+        if (event.key === "Escape") { setKiroDemo(false); return; }
+        if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); go(active + 1); return; }
+        return;
+      }
       if (finale && !["Escape", "v", "V"].includes(event.key)) return;
       if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); go(active + 1); }
       if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); go(active - 1); }
