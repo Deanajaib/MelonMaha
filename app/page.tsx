@@ -397,7 +397,7 @@ export default function Home() {
         <div className="intro-chat-log" ref={introLogRef}>
           {introBubbles.slice(0, introBubbleIndex + 1).map((bubble, i) => (
             <div key={i} className={`chat-bubble chat-${bubble.from} ${i === introBubbleIndex ? "chat-latest" : ""}`}>
-              <span className="chat-avatar">{bubble.from === "me" ? "ME" : <svg viewBox="0 0 24 24" fill="white" className="kiro-ghost"><path d="M12 2C7.03 2 3 6.03 3 11v9.5c0 .28.22.5.5.5s.5-.22.5-.5V19c0-.28.22-.5.5-.5s.5.22.5.5v2c0 .28.22.5.5.5s.5-.22.5-.5v-2c0-.28.22-.5.5-.5s.5.22.5.5v1.5c0 .28.22.5.5.5s.5-.22.5-.5V19c0-.28.22-.5.5-.5s.5.22.5.5v2c0 .28.22.5.5.5s.5-.22.5-.5v-2c0-.28.22-.5.5-.5s.5.22.5.5v1.5c0 .28.22.5.5.5s.5-.22.5-.5V19c0-.28.22-.5.5-.5s.5.22.5.5v2c0 .28.22.5.5.5s.5-.22.5-.5V11c0-4.97-4.03-9-9-9zm-3 10.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm6 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>}</span>
+              <span className="chat-avatar">{bubble.from === "me" ? "ME" : "KIRO"}</span>
               <p>{bubble.text}</p>
             </div>
           ))}
