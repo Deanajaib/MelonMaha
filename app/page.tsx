@@ -37,6 +37,17 @@ const gameCards = [
   { id: "market", image: "/assets/game-buy-sell.webp", title: "Buy & Sell Simulation", meta: "Strategy · 3 min" },
 ] as const;
 
+const introBubbles = [
+  { from: "me", text: "Kiro, can you build a presentation website about melon for me?" },
+  { from: "kiro", text: "Sure. What's the concept?" },
+  { from: "me", text: "I want to tell a story—start with a 3D melon, scan it to reveal data beneath the surface, then show production analytics on a map, explain why melon matters at MAHA, present a live dashboard, let visitors play games, and close with a finale video." },
+  { from: "kiro", text: "That's a solid narrative arc. I'll structure it as eight scenes—object, data, analytics, theme, problem-solution, dashboard, games, and the MAHA experience. Each scene transitions cinematically. Sound good?" },
+  { from: "me", text: "Perfect. Let's build it." },
+  { from: "kiro", text: "On it." },
+  { from: "pause", text: "··· a few minutes later ···" },
+  { from: "kiro", text: "Done—ready to present. Take a look." },
+] as const;
+
 const mahaYouTubeUrl = "https://www.youtube.com/embed/ni3vYEiDPzA?autoplay=0&loop=1&playlist=ni3vYEiDPzA&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&cc_load_policy=0&cc_lang_pref=en&hl=en&iv_load_policy=3";
 const mahaOfficialUrl = "https://mahaofficial.com.my/";
 const mahaQrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(mahaOfficialUrl)}&size=600&margin=2&dark=06140f&light=ffffff&ecLevel=H`;
@@ -206,6 +217,8 @@ export default function Home() {
   const [scanConfirmed, setScanConfirmed] = useState(false);
   const [scanComplete, setScanComplete] = useState(false);
   const [cursor, setCursor] = useState({ x: -100, y: -100 });
+  const [introDone, setIntroDone] = useState(false);
+  const [introBubbleIndex, setIntroBubbleIndex] = useState(0);
   const scanTimers = useRef<number[]>([]);
   const finaleTimer = useRef<number | null>(null);
   const finalePlayer = useRef<HTMLIFrameElement>(null);
@@ -302,6 +315,17 @@ export default function Home() {
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      // Intro scene — advance bubbles
+      if (!introDone) {
+        if (["ArrowRight", "PageDown", " ", "Enter"].includes(event.key)) {
+          event.preventDefault();
+          if (introBubbleIndex < introBubbles.length - 1) setIntroBubbleIndex(i => i + 1);
+          else setIntroDone(true);
+          return;
+        }
+        if (event.key === "Escape" || /^[1-9]$/.test(event.key)) { setIntroDone(true); return; }
+        return;
+      }
       // Don't intercept keys when chatbot widget or any iframe/input has focus
       const target = event.target as HTMLElement;
       const tag = target?.tagName;
@@ -336,7 +360,7 @@ export default function Home() {
       if (event.key === "Escape") { if (finale) closeFinale(); setMenuOpen(false); }
     };
     window.addEventListener("keydown", onKey); return () => window.removeEventListener("keydown", onKey);
-  }, [active, analyticsPopup, closeFinale, externalPopup, finale, go, kiroDemo, launchFinale, openExternalPopup]);
+  }, [active, analyticsPopup, closeFinale, externalPopup, finale, go, introBubbleIndex, introDone, kiroDemo, launchFinale, openExternalPopup]);
 
   useEffect(() => {
     const move = (e: PointerEvent) => setCursor({ x: e.clientX, y: e.clientY });
@@ -350,7 +374,21 @@ export default function Home() {
   };
 
   return (
-    <main className={`show scene-${scene.id} ${finaleTransitioning ? "finale-transitioning" : ""}`}>
+    <main className={`show scene-${scene.id} ${finaleTransitioning ? "finale-transitioning" : ""} ${!introDone ? "intro-active" : ""}`}>
+      {!introDone && <div className="intro-chat" aria-label="Conversation between presenter and Kiro">
+        <div className="intro-chat-header"><span>BUILDING WITH KIRO</span></div>
+        <div className="intro-chat-log">
+          {introBubbles.slice(0, introBubbleIndex + 1).map((bubble, i) => (
+            <div key={i} className={`chat-bubble chat-${bubble.from} ${i === introBubbleIndex ? "chat-latest" : ""}`}>
+              {bubble.from !== "pause" && <span className="chat-avatar">{bubble.from === "me" ? "ME" : "K"}</span>}
+              <p>{bubble.text}</p>
+            </div>
+          ))}
+        </div>
+        <div className="intro-chat-hint">
+          <span>{introBubbleIndex < introBubbles.length - 1 ? "PRESS → OR SPACE TO CONTINUE" : "PRESS → TO BEGIN"}</span>
+        </div>
+      </div>}
       <div className="cursor-core" style={{ transform: `translate3d(${cursor.x}px,${cursor.y}px,0)` }} />
       <div className="grain" />
       <div className="grid-plane" />
