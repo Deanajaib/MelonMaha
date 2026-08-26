@@ -43,8 +43,7 @@ const introBubbles = [
   { from: "me", text: "I want to tell a story—start with a 3D melon, scan it to reveal data beneath the surface, then show production analytics on a map, explain why melon matters at MAHA, present a live dashboard, let visitors play games, and close with a finale video." },
   { from: "kiro", text: "That's a solid narrative arc. I'll structure it as eight scenes—object, data, analytics, theme, problem-solution, dashboard, games, and the MAHA experience. Each scene transitions cinematically. Sound good?" },
   { from: "me", text: "Perfect. Let's build it." },
-  { from: "kiro", text: "On it." },
-  { from: "pause", text: "··· a few minutes later ···" },
+  { from: "kiro", text: "On it. Let me start building the website now." },
   { from: "kiro", text: "Done—ready to present. Take a look." },
 ] as const;
 
