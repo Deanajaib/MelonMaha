@@ -217,7 +217,9 @@ export default function Home() {
   const [scanComplete, setScanComplete] = useState(false);
   const [cursor, setCursor] = useState({ x: -100, y: -100 });
   const [introDone, setIntroDone] = useState(false);
+  const [introExiting, setIntroExiting] = useState(false);
   const [introBubbleIndex, setIntroBubbleIndex] = useState(0);
+  const introLogRef = useRef<HTMLDivElement>(null);
   const scanTimers = useRef<number[]>([]);
   const finaleTimer = useRef<number | null>(null);
   const finalePlayer = useRef<HTMLIFrameElement>(null);
@@ -275,6 +277,11 @@ export default function Home() {
     setFinale(false);
   }, []);
 
+  const finishIntro = useCallback(() => {
+    setIntroExiting(true);
+    window.setTimeout(() => { setIntroDone(true); setIntroExiting(false); }, 600);
+  }, []);
+
   const go = useCallback((next: number) => {
     if (active === scenes.length - 1 && next > active) { launchFinale(); return; }
     const target = Math.max(0, Math.min(scenes.length - 1, next));
@@ -320,12 +327,12 @@ export default function Home() {
           event.preventDefault();
           setIntroBubbleIndex(prev => {
             if (prev < introBubbles.length - 1) return prev + 1;
-            setIntroDone(true);
+            finishIntro();
             return prev;
           });
           return;
         }
-        if (event.key === "Escape" || /^[1-9]$/.test(event.key)) { setIntroDone(true); return; }
+        if (event.key === "Escape" || /^[1-9]$/.test(event.key)) { finishIntro(); return; }
         return;
       }
       // Don't intercept keys when chatbot widget or any iframe/input has focus
@@ -362,12 +369,20 @@ export default function Home() {
       if (event.key === "Escape") { if (finale) closeFinale(); setMenuOpen(false); }
     };
     window.addEventListener("keydown", onKey); return () => window.removeEventListener("keydown", onKey);
-  }, [active, analyticsPopup, closeFinale, externalPopup, finale, go, introBubbleIndex, introDone, kiroDemo, launchFinale, openExternalPopup]);
+  }, [active, analyticsPopup, closeFinale, externalPopup, finale, finishIntro, go, introDone, kiroDemo, launchFinale, openExternalPopup]);
 
   useEffect(() => {
     const move = (e: PointerEvent) => setCursor({ x: e.clientX, y: e.clientY });
     window.addEventListener("pointermove", move); return () => window.removeEventListener("pointermove", move);
   }, []);
+
+  // Auto-scroll intro chat to the latest bubble
+  useEffect(() => {
+    if (introDone) return;
+    const log = introLogRef.current;
+    if (log) log.scrollTo({ top: log.scrollHeight, behavior: "smooth" });
+  }, [introBubbleIndex, introDone]);
+
 
 
   const enterFullscreen = async () => {
@@ -376,13 +391,13 @@ export default function Home() {
   };
 
   return (
-    <main className={`show scene-${scene.id} ${finaleTransitioning ? "finale-transitioning" : ""} ${!introDone ? "intro-active" : ""}`}>
-      {!introDone && <div className="intro-chat" aria-label="Conversation between presenter and Kiro">
+    <main className={`show scene-${scene.id} ${finaleTransitioning ? "finale-transitioning" : ""} ${!introDone ? "intro-active" : ""} ${introExiting ? "intro-transitioning" : ""}`}>
+      {!introDone && <div className={`intro-chat ${introExiting ? "intro-exiting" : ""}`} aria-label="Conversation between presenter and Kiro">
         <div className="intro-chat-header"><span>BUILDING WITH KIRO</span></div>
-        <div className="intro-chat-log">
+        <div className="intro-chat-log" ref={introLogRef}>
           {introBubbles.slice(0, introBubbleIndex + 1).map((bubble, i) => (
             <div key={i} className={`chat-bubble chat-${bubble.from} ${i === introBubbleIndex ? "chat-latest" : ""}`}>
-              {bubble.from !== "pause" && <span className="chat-avatar">{bubble.from === "me" ? "ME" : "K"}</span>}
+              <span className="chat-avatar">{bubble.from === "me" ? "ME" : "K"}</span>
               <p>{bubble.text}</p>
             </div>
           ))}
