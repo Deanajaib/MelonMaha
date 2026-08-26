@@ -293,7 +293,7 @@ export default function Home() {
     if (target < 6) setFinaleVideoReady(false);
     if (target !== 1) { setScanning(false); setScanConfirmed(false); setScanComplete(false); }
     setAutoStep(0);
-  }, [active, kiroDemo, launchFinale, openExternalPopup, runScan]);
+  }, [active, autoStep, kiroDemo, launchFinale, openExternalPopup, runScan]);
 
   useEffect(() => () => {
     scanTimers.current.forEach(window.clearTimeout);
