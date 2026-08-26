@@ -319,8 +319,11 @@ export default function Home() {
       if (!introDone) {
         if (["ArrowRight", "PageDown", " ", "Enter"].includes(event.key)) {
           event.preventDefault();
-          if (introBubbleIndex < introBubbles.length - 1) setIntroBubbleIndex(i => i + 1);
-          else setIntroDone(true);
+          setIntroBubbleIndex(prev => {
+            if (prev < introBubbles.length - 1) return prev + 1;
+            setIntroDone(true);
+            return prev;
+          });
           return;
         }
         if (event.key === "Escape" || /^[1-9]$/.test(event.key)) { setIntroDone(true); return; }
