@@ -37,7 +37,7 @@ const gameCards = [
   { id: "market", image: "/assets/game-buy-sell.webp", title: "Buy & Sell Simulation", meta: "Strategy · 3 min" },
 ] as const;
 
-const mahaYouTubeUrl = "https://www.youtube.com/embed/ni3vYEiDPzA?autoplay=0&loop=1&playlist=ni3vYEiDPzA&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&cc_load_policy=0&cc_lang_pref=en";
+const mahaYouTubeUrl = "https://www.youtube.com/embed/ni3vYEiDPzA?autoplay=0&loop=1&playlist=ni3vYEiDPzA&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&cc_load_policy=0&cc_lang_pref=en&hl=en&iv_load_policy=3";
 const mahaOfficialUrl = "https://mahaofficial.com.my/";
 const mahaQrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(mahaOfficialUrl)}&size=600&margin=2&dark=06140f&light=ffffff&ecLevel=H`;
 const melonSupplyIntelligenceUrl = "https://pantauharga.vercel.app/Melon-MAHA2026-v2.html";
@@ -239,6 +239,7 @@ export default function Home() {
     const sendPlayerCommand = (func: string, args: unknown[] = []) => finalePlayer.current?.contentWindow?.postMessage(JSON.stringify({ event: "command", func, args }), "https://www.youtube.com");
     sendPlayerCommand("unloadModule", ["captions"]);
     sendPlayerCommand("unloadModule", ["cc"]);
+    sendPlayerCommand("setOption", ["captions", "track", {}]);
     sendPlayerCommand("seekTo", [0, true]);
     sendPlayerCommand("unMute");
     sendPlayerCommand("setVolume", [100]);
