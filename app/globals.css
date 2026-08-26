@@ -274,12 +274,12 @@
 
 /* Kiro demo video overlay */
 .kiro-demo{display:flex;align-items:center;justify-content:center;background:rgba(2,5,4,.97);animation:finaleScreenIn .6s cubic-bezier(.16,.9,.2,1) both}
-.kiro-demo iframe{width:min(92vw,1280px);height:min(80vh,720px);border:1px solid rgba(185,168,255,.4);box-shadow:0 30px 90px rgba(0,0,0,.7),0 0 40px rgba(185,168,255,.12);background:#000}
+.kiro-demo iframe{width:min(94vw,1500px);height:min(90vh,940px);border:1px solid rgba(185,168,255,.4);box-shadow:0 30px 90px rgba(0,0,0,.7),0 0 40px rgba(185,168,255,.12);background:#000}
 .kiro-demo-controls{position:absolute;bottom:28px;right:180px;display:flex;align-items:center;gap:8px}
 .kiro-demo-controls span{padding:12px 14px;background:rgba(0,0,0,.55);font:700 7px Arial;letter-spacing:.13em;color:rgba(255,255,255,.75)}
 .kiro-demo-controls button{border:1px solid rgba(185,168,255,.45);background:rgba(0,0,0,.55);padding:12px 16px;font:700 8px Arial;letter-spacing:.14em;cursor:pointer;color:#eee;transition:.25s}
 .kiro-demo-controls button:hover{background:var(--acid);color:#03100b;border-color:var(--acid)}
-@media(max-width:800px){.kiro-demo iframe{width:96vw;height:56vw}.kiro-demo-controls{bottom:16px;right:16px}}
+@media(max-width:800px){.kiro-demo iframe{width:96vw;height:94vh}.kiro-demo-controls{bottom:16px;right:16px}}
 
 /* "Plan with Kiro" clickable node */
 .flow-clickable{cursor:pointer;transition:transform .3s ease,border-color .3s ease,box-shadow .3s ease}

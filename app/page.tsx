@@ -40,14 +40,14 @@ const gameCards = [
 const introBubbles = [
   { from: "me", text: "Kiro, can you build a presentation website about melon for me?" },
   { from: "kiro", text: "Sure. What's the concept?" },
-  { from: "me", text: "I want to tell a story—start with a 3D melon, scan it to reveal data beneath the surface, then show production analytics on a map, explain why melon matters at MAHA, present a live dashboard, let visitors play games, and close with a finale video." },
+  { from: "me", text: "I want to tell a story—start with a 3D melon, scan it to reveal data beneath the surface, then show production analytics on a map, explain why melon matters, present a live dashboard, let visitors play games, and close with a finale video." },
   { from: "kiro", text: "That's a solid narrative arc. I'll structure it as eight scenes—object, data, analytics, theme, problem-solution, dashboard, games, and the MAHA experience. Each scene transitions cinematically. Sound good?" },
   { from: "me", text: "Perfect. Let's build it." },
   { from: "kiro", text: "On it. Let me start building the website now." },
   { from: "kiro", text: "Done—ready to present. Take a look." },
 ] as const;
 
-const mahaYouTubeUrl = "https://www.youtube.com/embed/ni3vYEiDPzA?autoplay=0&loop=1&playlist=ni3vYEiDPzA&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&cc_load_policy=0&cc_lang_pref=en&hl=en&iv_load_policy=3";
+const mahaYouTubeUrl = "https://www.youtube.com/embed/CDq1bIV2fYc?autoplay=0&loop=1&playlist=CDq1bIV2fYc&controls=1&rel=0&modestbranding=1&playsinline=1&enablejsapi=1&cc_load_policy=0&cc_lang_pref=en&hl=en&iv_load_policy=3";
 const mahaOfficialUrl = "https://mahaofficial.com.my/";
 const mahaQrUrl = `https://quickchart.io/qr?text=${encodeURIComponent(mahaOfficialUrl)}&size=600&margin=2&dark=06140f&light=ffffff&ecLevel=H`;
 const melonSupplyIntelligenceUrl = "https://pantauharga.vercel.app/Melon-MAHA2026-v2.html";
