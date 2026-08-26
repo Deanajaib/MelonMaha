@@ -210,6 +210,9 @@ export default function Home() {
   const finaleTimer = useRef<number | null>(null);
   const finalePlayer = useRef<HTMLIFrameElement>(null);
   const [kiroDemo, setKiroDemo] = useState(false);
+  const [autoStep, setAutoStep] = useState(0);
+  const [analyticsPopup, setAnalyticsPopup] = useState<"map"|"trend"|null>(null);
+  const [analyticsState, setAnalyticsState] = useState("JOHOR");
   const scene = scenes[active];
   const openExternalPopup = useCallback((title: string, url: string) => {
     setExternalReady(false);
@@ -268,12 +271,29 @@ export default function Home() {
       if (!kiroDemo) { setKiroDemo(true); return; }
       setKiroDemo(false);
     }
+    // Scene 03 (BUILD, index 2): next → map JOHOR, next → map KELANTAN, next → proceed
+    if (active === 2 && target === 3) {
+      if (autoStep === 0) { setAnalyticsPopup("map"); setAnalyticsState("JOHOR"); setAutoStep(1); return; }
+      if (autoStep === 1) { setAnalyticsState("KELANTAN"); setAutoStep(2); return; }
+      setAnalyticsPopup(null); setAutoStep(0);
+    }
+    // Scene 06 (ASK, index 5): next → open dashboard popup, next → proceed
+    if (active === 5 && target === 6) {
+      if (autoStep === 0) { setExternalReady(false); setExternalPopup({ title: "MELON SUPPLY INTELLIGENCE · MAHA 2026", url: melonSupplyIntelligenceUrl }); setAutoStep(1); return; }
+      setExternalPopup(null); setAutoStep(0);
+    }
+    // Scene 07 (PLAY, index 6): next → open games popup, next → proceed
+    if (active === 6 && target === 7) {
+      if (autoStep === 0) { setExternalReady(false); setExternalPopup({ title: "SISDA GAMES", url: "https://gamesv2.sisda.my/" }); setAutoStep(1); return; }
+      setExternalPopup(null); setAutoStep(0);
+    }
     scanTimers.current.forEach(window.clearTimeout);
     scanTimers.current = [];
     setFinale(false); setActive(target);
     if (target < 6) setFinaleVideoReady(false);
     if (target !== 1) { setScanning(false); setScanConfirmed(false); setScanComplete(false); }
-  }, [active, kiroDemo, launchFinale, runScan]);
+    setAutoStep(0);
+  }, [active, kiroDemo, launchFinale, openExternalPopup, runScan]);
 
   useEffect(() => () => {
     scanTimers.current.forEach(window.clearTimeout);
@@ -289,8 +309,14 @@ export default function Home() {
       if (document.activeElement?.tagName === "IFRAME") return;
       // Block navigation when chatbot or any overlay outside our app has focus
       if (target && !target.closest(".show") && !target.closest("nav") && !target.closest("header") && target !== document.body) return;
+      if (analyticsPopup) {
+        if (event.key === "Escape") { setAnalyticsPopup(null); setAutoStep(0); return; }
+        if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); go(active + 1); return; }
+        return;
+      }
       if (externalPopup) {
-        if (event.key === "Escape") setExternalPopup(null);
+        if (event.key === "Escape") { setExternalPopup(null); setAutoStep(0); return; }
+        if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); go(active + 1); return; }
         return;
       }
       if (kiroDemo) {
@@ -310,7 +336,7 @@ export default function Home() {
       if (event.key === "Escape") { if (finale) closeFinale(); setMenuOpen(false); }
     };
     window.addEventListener("keydown", onKey); return () => window.removeEventListener("keydown", onKey);
-  }, [active, closeFinale, externalPopup, finale, go, kiroDemo, launchFinale, openExternalPopup]);
+  }, [active, analyticsPopup, closeFinale, externalPopup, finale, go, kiroDemo, launchFinale, openExternalPopup]);
 
   useEffect(() => {
     const move = (e: PointerEvent) => setCursor({ x: e.clientX, y: e.clientY });
@@ -368,7 +394,7 @@ export default function Home() {
             </div>
             <p className="problem-flow-foot">From idea to output—planned with Kiro, delivered as a dashboard and games.</p>
           </section>}
-          {scene.id === "build" && <SceneThreeAnalytics />}
+          {scene.id === "build" && <SceneThreeAnalytics externalPopup={analyticsPopup} externalState={analyticsState} />}
           {scene.id === "play" && <section className="game-showcase" aria-label="Sisda mini games">
             <div className="game-showcase-head"><span>03 PLAYABLE EXPERIENCES</span><b>BUILT WITH KIRO</b></div>
             <div className="game-card-grid">

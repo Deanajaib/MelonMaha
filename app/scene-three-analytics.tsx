@@ -143,10 +143,12 @@ function ProductionTrend({ rows, compact=false }:{rows:RecordRow[];compact?:bool
   </svg>{hovered!==null&&!compact&&<div className="trend-tooltip" style={{left:`${Math.min(78,Math.max(16,(hoverX||0)/W*100))}%`}}><strong>{years[hovered]}</strong>{series.map(s=><span key={s.commodity}><i style={{background:palette[s.commodity]}}/><em>{varietyLabel(s.commodity)}</em><b>{number.format(s.values[hovered])} MT</b></span>)}</div>}{compact&&<aside className="trend-figures" aria-live="polite"><strong>{years[activeIndex]}</strong><small>PRODUCTION (MT)</small>{series.map(s=><span key={s.commodity}><i style={{background:palette[s.commodity]}}/><em>{varietyLabel(s.commodity)}</em><b>{number.format(s.values[activeIndex])} MT</b></span>)}</aside>}<div className="trend-legend">{series.map(s=><span key={s.commodity}><i style={{background:palette[s.commodity]}}/>{varietyLabel(s.commodity)}</span>)}</div></div>;
 }
 
-export default function SceneThreeAnalytics(){
+export default function SceneThreeAnalytics({ externalPopup, externalState }:{ externalPopup?:"map"|"trend"|null; externalState?:string }){
   const [rows,setRows]=useState<RecordRow[]>([]),[popup,setPopup]=useState<"map"|"trend"|null>(null),[year,setYear]=useState(2024),[commodity,setCommodity]=useState("ALL"),[selected,setSelected]=useState("JOHOR");
   useEffect(()=>{let cancelled=false;loadMelonRows().then(data=>{if(!cancelled)setRows(data)}).catch(error=>console.error(error));return()=>{cancelled=true}},[]);
   useEffect(()=>{const key=(e:KeyboardEvent)=>{if(e.key==="Escape")setPopup(null)};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key)},[]);
+  useEffect(()=>{if(externalPopup!==undefined)setPopup(externalPopup)},[externalPopup]);
+  useEffect(()=>{if(externalState)setSelected(externalState)},[externalState]);
   const filtered=useMemo(()=>rows.filter(r=>r.year===year&&(commodity==="ALL"||r.commodity===commodity)),[rows,year,commodity]);
   const stateMetrics=useMemo(()=>{const map=new Map<string,Metric>();filtered.forEach(r=>{const m=map.get(r.state)||emptyMetric();m.planted+=r.planted;m.harvested+=r.harvested;m.production+=r.production;map.set(r.state,m)});return map},[filtered]);
   const overviewMetrics=useMemo(()=>{const map=new Map<string,Metric>();rows.filter(r=>r.year===2024).forEach(r=>{const m=map.get(r.state)||emptyMetric();m.planted+=r.planted;m.harvested+=r.harvested;m.production+=r.production;map.set(r.state,m)});return map},[rows]);
