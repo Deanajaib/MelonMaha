@@ -397,7 +397,7 @@ export default function Home() {
         <div className="intro-chat-log" ref={introLogRef}>
           {introBubbles.slice(0, introBubbleIndex + 1).map((bubble, i) => (
             <div key={i} className={`chat-bubble chat-${bubble.from} ${i === introBubbleIndex ? "chat-latest" : ""}`}>
-              <span className="chat-avatar">{bubble.from === "me" ? "ME" : "K"}</span>
+              <span className="chat-avatar">{bubble.from === "me" ? "ME" : <img src="/assets/kiro-avatar.png" alt="Kiro" />}</span>
               <p>{bubble.text}</p>
             </div>
           ))}

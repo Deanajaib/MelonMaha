@@ -322,7 +322,8 @@
 /* Avatars */
 .chat-avatar{flex-shrink:0;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;font:700 9px "Geist Mono",monospace;letter-spacing:.05em}
 .chat-me .chat-avatar{background:rgba(121,255,208,.15);border:1px solid rgba(121,255,208,.5);color:#79ffd0}
-.chat-kiro .chat-avatar{background:rgba(185,168,255,.15);border:1px solid rgba(185,168,255,.5);color:#b9a8ff}
+.chat-kiro .chat-avatar{background:rgba(185,168,255,.15);border:1px solid rgba(185,168,255,.5);color:#b9a8ff;overflow:hidden;padding:0}
+.chat-kiro .chat-avatar img{width:100%;height:100%;object-fit:cover;transform:scaleX(-1);display:block}
 .chat-pause .chat-avatar{display:none}
 
 /* Bottom hint */
