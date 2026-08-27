@@ -311,6 +311,10 @@ export default function Home() {
     setFinale(false); setActive(target);
     if (target < 6) setFinaleVideoReady(false);
     if (target !== 1) { setScanning(false); setScanConfirmed(false); setScanComplete(false); }
+    // Clear any lingering overlays when landing on a new scene
+    setAnalyticsPopup(null);
+    setExternalPopup(null);
+    setKiroDemo(false);
     setAutoStep(0);
   }, [active, autoStep, kiroDemo, launchFinale, openExternalPopup, runScan]);
 
@@ -345,16 +349,19 @@ export default function Home() {
       if (analyticsPopup) {
         if (event.key === "Escape") { setAnalyticsPopup(null); setAutoStep(0); return; }
         if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); go(active + 1); return; }
+        if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); setAnalyticsPopup(null); setAutoStep(0); return; }
         return;
       }
       if (externalPopup) {
         if (event.key === "Escape") { setExternalPopup(null); setAutoStep(0); return; }
         if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); go(active + 1); return; }
+        if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); setExternalPopup(null); setAutoStep(0); return; }
         return;
       }
       if (kiroDemo) {
         if (event.key === "Escape") { setKiroDemo(false); return; }
         if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); go(active + 1); return; }
+        if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); setKiroDemo(false); return; }
         return;
       }
       if (finale && !["Escape", "v", "V"].includes(event.key)) return;
