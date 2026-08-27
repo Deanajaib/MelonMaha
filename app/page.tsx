@@ -24,11 +24,11 @@ const problemFlow = [
 ] as const;
 
 const melonInsights = [
-  { id: "commodity", icon: "ID", label: "Commodity name", sublabel: "Nama komoditi", position: "bottom-left" },
-  { id: "origin", icon: "⌖", label: "Origin", sublabel: "Asal", position: "top-left" },
-  { id: "grade", icon: "◇", label: "Grade", sublabel: "Gred", position: "top-right" },
-  { id: "maturity", icon: "◉", label: "Maturity index", sublabel: "Indeks kematangan", position: "mid-left" },
-  { id: "size", icon: "↔", label: "Size", sublabel: "Saiz", position: "mid-right" },
+  { id: "commodity", icon: "ID", label: "Commodity name", sublabel: "Nama komoditi", position: "bottom-left", value: "Rockmelon" },
+  { id: "origin", icon: "⌖", label: "Origin", sublabel: "Asal", position: "top-left", value: "Malaysia" },
+  { id: "grade", icon: "◇", label: "Grade", sublabel: "Gred", position: "top-right", value: "Premium" },
+  { id: "maturity", icon: "◉", label: "Maturity index", sublabel: "Indeks kematangan", position: "mid-left", value: null },
+  { id: "size", icon: "↔", label: "Size", sublabel: "Saiz", position: "mid-right", value: null },
 ] as const;
 
 const gameCards = [
@@ -489,7 +489,7 @@ export default function Home() {
             {melonInsights.map((item, index) => <article key={item.id} className={`insight-card ${item.position}`} style={{ animationDelay: `${index * 130}ms` }}>
               <i className="connector" />
               <span className="insight-icon">{item.icon}</span>
-              <div><small>{item.sublabel}</small><strong>{item.label}</strong></div>
+              <div><small>{item.sublabel}</small><strong>{item.label}</strong>{item.value && <em className="insight-value">{item.value}</em>}</div>
             </article>)}
           </div>
         </div>

@@ -339,3 +339,8 @@
   .intro-chat-header{font-size:7px;top:18px}
   .intro-chat-hint{font-size:6px;bottom:20px}
 }
+
+
+/* Scene 02 — actual data value shown under specific insight labels */
+.insight-value{display:block;margin-top:6px;color:var(--acid);font:700 15px/1.1 Arial;letter-spacing:-.01em;font-style:normal;text-transform:none}
+@media(max-width:800px){.insight-value{font-size:11px;margin-top:4px}}
