@@ -29,6 +29,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en-MY">
+      <head>
+        <link rel="preload" href="/assets/earls-favourite-melon.glb" as="fetch" type="model/gltf-binary" crossOrigin="anonymous" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
