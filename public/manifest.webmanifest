@@ -1,0 +1,31 @@
+{
+  "name": "MahaMelon — Melon Supply Intelligence",
+  "short_name": "MahaMelon",
+  "description": "From Agricultural Data to Digital Experience — an immersive FAMA melon supply intelligence presentation.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#020706",
+  "theme_color": "#020706",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
