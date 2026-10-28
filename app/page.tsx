@@ -467,7 +467,7 @@ export default function Home() {
           {scene.id === "problem" && <section className="problem-flow" aria-label="Problem to solution process">
             <div className="problem-flow-head"><span>OUR PROCESS</span><b>IDEA → BUILD</b></div>
             <div className="problem-flow-track">
-              {problemFlow.map((step, index) => <div key={step.id} className={`flow-node flow-${step.id} ${step.id === "kiro" ? "flow-clickable" : ""}`} style={{ "--delay": `${index * 0.16}s` } as React.CSSProperties} onClick={step.id === "kiro" ? () => setKiroDemo(true) : undefined} role={step.id === "kiro" ? "button" : undefined} tabIndex={step.id === "kiro" ? 0 : undefined} aria-label={step.id === "kiro" ? "Watch Kiro demo video" : undefined}>
+              {problemFlow.map((step, index) => <div key={step.id} className={`flow-node flow-${step.id} ${step.id === "kiro" ? "flow-clickable" : ""}`} style={{ "--delay": `${index * 0.16}s` } as React.CSSProperties} onClick={step.id === "kiro" ? () => setKiroDemo(true) : undefined} onKeyDown={step.id === "kiro" ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setKiroDemo(true); } } : undefined} role={step.id === "kiro" ? "button" : undefined} tabIndex={step.id === "kiro" ? 0 : undefined} aria-label={step.id === "kiro" ? "Watch Kiro demo video" : undefined}>
                 <span className="flow-tag">{step.tag}</span>
                 <strong>{step.title}</strong>
                 <small>{step.body}</small>

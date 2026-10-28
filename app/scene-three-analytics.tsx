@@ -147,8 +147,10 @@ export default function SceneThreeAnalytics({ externalPopup, externalState }:{ e
   const [rows,setRows]=useState<RecordRow[]>([]),[popup,setPopup]=useState<"map"|"trend"|null>(null),[year,setYear]=useState(2024),[commodity,setCommodity]=useState("ALL"),[selected,setSelected]=useState("JOHOR");
   useEffect(()=>{let cancelled=false;loadMelonRows().then(data=>{if(!cancelled)setRows(data)}).catch(error=>console.error(error));return()=>{cancelled=true}},[]);
   useEffect(()=>{const key=(e:KeyboardEvent)=>{if(e.key==="Escape")setPopup(null)};window.addEventListener("keydown",key);return()=>window.removeEventListener("keydown",key)},[]);
-  useEffect(()=>{if(externalPopup!==undefined)setPopup(externalPopup)},[externalPopup]);
-  useEffect(()=>{if(externalState)setSelected(externalState)},[externalState]);
+  const [prevExternalPopup,setPrevExternalPopup]=useState(externalPopup);
+  if(externalPopup!==prevExternalPopup){setPrevExternalPopup(externalPopup);if(externalPopup!==undefined)setPopup(externalPopup);}
+  const [prevExternalState,setPrevExternalState]=useState(externalState);
+  if(externalState!==prevExternalState){setPrevExternalState(externalState);if(externalState)setSelected(externalState);}
   const filtered=useMemo(()=>rows.filter(r=>r.year===year&&(commodity==="ALL"||r.commodity===commodity)),[rows,year,commodity]);
   const stateMetrics=useMemo(()=>{const map=new Map<string,Metric>();filtered.forEach(r=>{const m=map.get(r.state)||emptyMetric();m.planted+=r.planted;m.harvested+=r.harvested;m.production+=r.production;map.set(r.state,m)});return map},[filtered]);
   const overviewMetrics=useMemo(()=>{const map=new Map<string,Metric>();rows.filter(r=>r.year===2024).forEach(r=>{const m=map.get(r.state)||emptyMetric();m.planted+=r.planted;m.harvested+=r.harvested;m.production+=r.production;map.set(r.state,m)});return map},[rows]);
