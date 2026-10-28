@@ -23,7 +23,7 @@ test("server-renders the FAMA presentation shell", async () => {
   assert.match(html, /<title>What Do You See in a Melon\? \| FAMA<\/title>/i);
   assert.match(html, /FAMA · DIGITAL EXPERIENCE/);
   assert.match(html, /What do you see/);
-  assert.match(html, /01<!-- --> \/ <!-- -->07/);
+  assert.match(html, /01<!-- --> \/ <!-- -->08/);
   assert.match(html, /aria-label="Interactive 3D rock melon model"/);
   assert.match(html, /src="about:blank" title="MAHA finale video"/);
   assert.doesNotMatch(html, /Your site is taking shape|Building your site/);

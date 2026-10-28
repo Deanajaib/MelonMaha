@@ -318,6 +318,30 @@ export default function Home() {
     setAutoStep(0);
   }, [active, autoStep, kiroDemo, launchFinale, openExternalPopup, runScan]);
 
+  const advance = useCallback(() => {
+    if (!introDone) {
+      setIntroBubbleIndex(prev => {
+        if (prev < introBubbles.length - 1) return prev + 1;
+        finishIntro();
+        return prev;
+      });
+      return;
+    }
+    if (analyticsPopup) { go(active + 1); return; }
+    if (externalPopup) { go(active + 1); return; }
+    if (kiroDemo) { go(active + 1); return; }
+    if (finale) return;
+    go(active + 1);
+  }, [active, analyticsPopup, externalPopup, kiroDemo, finale, finishIntro, go, introDone]);
+
+  const goBack = useCallback(() => {
+    if (!introDone) return;
+    if (analyticsPopup) { setAnalyticsPopup(null); setAutoStep(0); return; }
+    if (externalPopup) { setExternalPopup(null); setAutoStep(0); return; }
+    if (kiroDemo) { setKiroDemo(false); return; }
+    go(active - 1);
+  }, [active, analyticsPopup, externalPopup, kiroDemo, go, introDone]);
+
   useEffect(() => () => {
     scanTimers.current.forEach(window.clearTimeout);
     if (finaleTimer.current) window.clearTimeout(finaleTimer.current);
@@ -329,11 +353,7 @@ export default function Home() {
       if (!introDone) {
         if (["ArrowRight", "PageDown", " ", "Enter"].includes(event.key)) {
           event.preventDefault();
-          setIntroBubbleIndex(prev => {
-            if (prev < introBubbles.length - 1) return prev + 1;
-            finishIntro();
-            return prev;
-          });
+          advance();
           return;
         }
         if (event.key === "Escape" || /^[1-9]$/.test(event.key)) { finishIntro(); return; }
@@ -348,25 +368,25 @@ export default function Home() {
       if (target && !target.closest(".show") && !target.closest("nav") && !target.closest("header") && target !== document.body) return;
       if (analyticsPopup) {
         if (event.key === "Escape") { setAnalyticsPopup(null); setAutoStep(0); return; }
-        if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); go(active + 1); return; }
-        if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); setAnalyticsPopup(null); setAutoStep(0); return; }
+        if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); advance(); return; }
+        if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); goBack(); return; }
         return;
       }
       if (externalPopup) {
         if (event.key === "Escape") { setExternalPopup(null); setAutoStep(0); return; }
-        if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); go(active + 1); return; }
-        if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); setExternalPopup(null); setAutoStep(0); return; }
+        if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); advance(); return; }
+        if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); goBack(); return; }
         return;
       }
       if (kiroDemo) {
         if (event.key === "Escape") { setKiroDemo(false); return; }
-        if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); go(active + 1); return; }
-        if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); setKiroDemo(false); return; }
+        if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); advance(); return; }
+        if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); goBack(); return; }
         return;
       }
       if (finale && !["Escape", "v", "V"].includes(event.key)) return;
-      if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); go(active + 1); }
-      if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); go(active - 1); }
+      if (["ArrowRight", "PageDown", " "].includes(event.key)) { event.preventDefault(); advance(); }
+      if (["ArrowLeft", "PageUp"].includes(event.key)) { event.preventDefault(); goBack(); }
       if (event.key === "Home") go(0);
       if (event.key === "End") go(scenes.length - 1);
       if (/^[1-8]$/.test(event.key)) go(Number(event.key) - 1);
@@ -376,7 +396,7 @@ export default function Home() {
       if (event.key === "Escape") { if (finale) closeFinale(); setMenuOpen(false); }
     };
     window.addEventListener("keydown", onKey); return () => window.removeEventListener("keydown", onKey);
-  }, [active, analyticsPopup, closeFinale, externalPopup, finale, finishIntro, go, introDone, kiroDemo, launchFinale, openExternalPopup]);
+  }, [active, advance, analyticsPopup, closeFinale, externalPopup, finale, finishIntro, go, goBack, introDone, kiroDemo, launchFinale, openExternalPopup]);
 
   useEffect(() => {
     const move = (e: PointerEvent) => setCursor({ x: e.clientX, y: e.clientY });
@@ -411,6 +431,7 @@ export default function Home() {
         </div>
         <div className="intro-chat-hint">
           <span>{introBubbleIndex < introBubbles.length - 1 ? "PRESS → OR SPACE TO CONTINUE" : "PRESS → TO BEGIN"}</span>
+          <span className="touch-only">{introBubbleIndex < introBubbles.length - 1 ? "TAP → TO CONTINUE" : "TAP → TO BEGIN"}</span>
         </div>
       </div>}
       <div className="cursor-core" style={{ transform: `translate3d(${cursor.x}px,${cursor.y}px,0)` }} />
@@ -538,6 +559,15 @@ export default function Home() {
         <div className="finale-fallback"><span>MAHA · FINALE</span><h2>The story<br/>continues beyond<br/>the screen.</h2><p>LOADING MAHA FILM</p></div>
         <div className="finale-controls"><span>AUDIO ON · YOUTUBE PLAYER</span><button onClick={closeFinale}>CLOSE ×</button></div>
       </div>
+
+      <nav className="touch-nav" aria-label="Presentation navigation">
+        <button className="touch-nav-btn" aria-label="Back" onClick={goBack} disabled={!introDone || (introDone && active === 0 && !analyticsPopup && !externalPopup && !kiroDemo && !finale)}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
+        </button>
+        <button className="touch-nav-btn" aria-label="Next" onClick={advance}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M9 18l6-6-6-6" /></svg>
+        </button>
+      </nav>
     </main>
   );
 }

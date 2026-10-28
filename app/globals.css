@@ -344,3 +344,9 @@
 /* Scene 02 — actual data value shown under specific insight labels */
 .insight-value{display:block;margin-top:6px;color:var(--acid);font:700 15px/1.1 Arial;letter-spacing:-.01em;font-style:normal;text-transform:none}
 @media(max-width:800px){.insight-value{font-size:11px;margin-top:4px}}
+
+/* FEAT-001 — on-screen touch navigation (placeholder; FEAT-002 refines) */
+.touch-nav{position:fixed;z-index:60;left:0;right:0;bottom:16px;display:flex;justify-content:center;gap:14px;pointer-events:none}
+.touch-nav-btn{pointer-events:auto;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:50%;background:rgba(3,12,9,.72);backdrop-filter:blur(6px);color:var(--ink);cursor:pointer}
+.touch-nav-btn:disabled{opacity:.3;cursor:default}
+.touch-only{display:none}
