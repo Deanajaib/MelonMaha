@@ -345,8 +345,96 @@
 .insight-value{display:block;margin-top:6px;color:var(--acid);font:700 15px/1.1 Arial;letter-spacing:-.01em;font-style:normal;text-transform:none}
 @media(max-width:800px){.insight-value{font-size:11px;margin-top:4px}}
 
-/* FEAT-001 — on-screen touch navigation (placeholder; FEAT-002 refines) */
-.touch-nav{position:fixed;z-index:60;left:0;right:0;bottom:16px;display:flex;justify-content:center;gap:14px;pointer-events:none}
-.touch-nav-btn{pointer-events:auto;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:50%;background:rgba(3,12,9,.72);backdrop-filter:blur(6px);color:var(--ink);cursor:pointer}
-.touch-nav-btn:disabled{opacity:.3;cursor:default}
+/* FEAT-002 — on-screen touch navigation (finished styling; markup from FEAT-001) */
+/* Pinned bottom corners, above every overlay (z over .external-popup/.data-popup/.kiro-demo/.finale). Next button nudged clear of the bottom-right chatbot widget, mirroring .scene-dots{right:90px}. Safe-area insets keep buttons reachable on notched devices. */
+.touch-nav{position:fixed;z-index:95;inset:auto 0 0;display:flex;align-items:flex-end;justify-content:space-between;padding:0 calc(16px + env(safe-area-inset-right)) calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));pointer-events:none}
+.touch-nav-btn{pointer-events:auto;width:44px;height:44px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:50%;background:rgba(3,12,9,.7);backdrop-filter:blur(6px);color:var(--acid);cursor:pointer;opacity:.45;transition:background .25s,box-shadow .25s,opacity .25s,transform .25s}
+.touch-nav-btn svg{width:22px;height:22px;display:block}
+.touch-nav-btn:hover{opacity:1;background:var(--acid);color:#03100b;box-shadow:0 0 22px rgba(121,255,208,.38);transform:translateY(-2px)}
+.touch-nav-btn:active{transform:scale(.94)}
+.touch-nav-btn:disabled{opacity:.25;pointer-events:none}
+/* Nudge Next clear of the bottom-right chatbot widget (same accommodation as .scene-dots{right:90px}) */
+.touch-nav-btn:last-child{margin-right:74px}
+/* Clearly tappable on touch / small viewports: solid, full-opacity, larger target. Lift above the bottom .chapter-nav bar (~60px tall) so the two don't overlap. */
+@media (pointer:coarse),(max-width:800px){.touch-nav{padding-bottom:calc(68px + env(safe-area-inset-bottom))}.touch-nav-btn{width:48px;height:48px;opacity:1;background:rgba(3,12,9,.82)}.touch-nav-btn svg{width:24px;height:24px}}
+/* NOTE: touch-nav stays visible during the intro — tapping Next advances the Kiro conversation (the core mobile fix from FEAT-001). The intro overlay is z-index:60; touch-nav at z-index:95 sits above it. */
+
 .touch-only{display:none}
+/* Touch devices: show the TAP hints, hide the desktop PRESS → copy; desktop does the inverse (default state) */
+@media (pointer:coarse){.touch-only{display:inline}.intro-chat-hint>span:not(.touch-only){display:none}}
+
+/* FEAT-002 — relax global height clip so short landscape phones are not cut off */
+.show{min-height:0}
+@media (max-width:800px){.show{min-height:0}}
+
+/* FEAT-002 — small-phone portrait (~360px): fluid chrome so nothing overflows */
+@media (max-width:380px){
+  .topbar{height:56px;padding:0 13px}
+  .brand{font-size:8px;letter-spacing:.14em;gap:9px}
+  .brand-mark{height:34px;width:30px}
+  .top-actions{gap:8px}
+  .icon-button{width:32px;height:32px}
+  .copy-panel{padding:26px 16px 78px}
+  .copy-panel h1{font-size:clamp(32px,10.5vw,44px)}
+  .lead{font-size:clamp(11px,3.4vw,13px);max-width:92vw}
+  .eyebrow{font-size:8px;letter-spacing:.16em;gap:9px;margin-bottom:12px}
+  .chapter-nav{height:54px;padding:0 14px;gap:10px}
+  .chapter-nav span{font-size:8px}
+  .scene-menu{width:min(420px,94vw);padding:70px 26px 32px}
+  .scene-menu>button:not(.close){font-size:16px;padding:15px 0}
+  .scene-menu>button span{width:36px}
+}
+
+/* FEAT-002 — short landscape phones (~740x360): compress vertical chrome so copy + visual fit with no scroll */
+@media (max-height:480px) and (orientation:landscape){
+  .topbar{height:52px;padding:0 20px}
+  .stage{height:calc(100svh - 110px)}
+  .copy-panel{padding:14px 20px 58px;justify-content:center}
+  .copy-panel h1{font-size:clamp(26px,5vw,40px)}
+  .lead{margin-top:10px;font-size:clamp(11px,1.6vw,13px);max-width:46vw}
+  .eyebrow{margin-bottom:8px}
+  .chapter-nav{height:50px}
+  /* Intro conversation: cap log height and keep internal scroll; tighten hint/header offsets */
+  .intro-chat{padding:2vh 4vw}
+  .intro-chat-log{max-height:60vh;gap:8px;padding:12px 0 20px}
+  .chat-bubble p{font-size:13px;padding:9px 13px}
+  .chat-avatar{width:30px;height:30px}
+  .intro-chat-header{top:8px}
+  .intro-chat-hint{bottom:8px}
+  /* Lift the on-screen nav clear of the ~50px chapter-nav bar; smaller buttons to save vertical room */
+  .touch-nav{padding-bottom:calc(56px + env(safe-area-inset-bottom))}
+  .touch-nav-btn{width:42px;height:42px}
+}
+
+/* FEAT-002 — overlays fit the viewport on mobile + short landscape without clipping */
+/* External iframe popup (dashboard scene 06, games scene 07) */
+@media (max-width:800px){
+  .external-popup{padding:max(1vh,env(safe-area-inset-top)) max(1.5vw,env(safe-area-inset-right)) max(1vh,env(safe-area-inset-bottom)) max(1.5vw,env(safe-area-inset-left))}
+  .external-window{width:97vw;height:min(96svh,96dvh)}
+  .external-window header button,.data-window>header button{padding:9px 11px}
+}
+/* Analytics drill-down windows (scene 03 map + trend); keep internal scroll on tall regions */
+@media (max-width:900px){
+  .data-popup{padding:max(1.5vh,env(safe-area-inset-top)) max(1.5vw,env(safe-area-inset-right)) max(1.5vh,env(safe-area-inset-bottom)) max(1.5vw,env(safe-area-inset-left))}
+  .data-window{width:97vw;height:min(96svh,96dvh)}
+  .map-main>aside{overflow:auto}
+  .district-table{overflow:auto}
+}
+/* Kiro demo video (scene 05 'Plan with Kiro' node) + finale fallback (scene 08) */
+@media (max-width:800px){
+  .kiro-demo iframe{width:97vw;height:min(80svh,80dvh)}
+  .kiro-demo-controls{bottom:calc(14px + env(safe-area-inset-bottom));right:auto;left:50%;transform:translateX(-50%)}
+  .finale-controls{right:auto;left:50%;bottom:calc(20px + env(safe-area-inset-bottom));transform:translateX(-50%)}
+  .finale-fallback{padding:24px 20px}
+  .finale-fallback h2{font-size:clamp(34px,11vw,54px)}
+}
+/* Short landscape: overlays use dynamic viewport height so close buttons stay reachable */
+@media (max-height:480px) and (orientation:landscape){
+  .external-window,.data-window{height:min(94svh,94dvh)}
+  .kiro-demo iframe{height:min(88svh,88dvh)}
+  .external-window header,.data-window>header{height:46px}
+  .external-window iframe,.external-loader{top:46px;height:calc(100% - 46px)}
+  .map-main{grid-template-columns:1fr}.map-main>canvas{height:40%}.map-main>aside{height:60%;overflow:auto}
+  .trend-drilldown{grid-template-columns:1fr;padding:3vh 4vw}.trend-title{display:none}
+  .finale-fallback h2{font-size:clamp(30px,8vw,48px);margin:14px 0}
+}
