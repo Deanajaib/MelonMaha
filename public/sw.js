@@ -1,73 +1,50 @@
-/* MahaMelon service worker — dependency-free, conservative offline shell.
- * - install: pre-cache the minimal app shell, then take over immediately.
- * - activate: drop old caches and claim open clients.
- * - fetch: only handle same-origin GETs. Navigations use network-first
- *   (falling back to cached '/'); other static assets use cache-first.
- *   Cross-origin requests (YouTube, nexus.sisda.my, quickchart,
- *   gamesv2.sisda.my, pantauharga.vercel.app, etc.) are left untouched.
+/* MahaMelon service worker — self-unregistering kill-switch.
+ *
+ * The previous version cached hashed build assets (mahamelon-v1) and served
+ * them cache-first, which served stale /_next/static chunks after a redeploy
+ * and broke the JS module graph ("This page couldn't load"). This replacement
+ * does the opposite: it deletes every cache, unregisters itself, and forces
+ * controlled clients to reload so stuck visitors self-heal. The fetch handler
+ * is a pure pass-through — nothing is ever served from cache.
  */
-const CACHE = "mahamelon-v1";
-const SHELL = [
-  "/",
-  "/manifest.webmanifest",
-  "/favicon.svg",
-  "/icon-192.png",
-  "/icon-512.png",
-  "/icon-maskable-512.png",
-  "/apple-touch-icon.png",
-];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(SHELL)).then(() => self.skipWaiting())
-  );
+  event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
-    caches
-      .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
-      .then(() => self.clients.claim())
+    (async () => {
+      try {
+        await self.clients.claim();
+      } catch {
+        /* best-effort */
+      }
+      try {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((key) => caches.delete(key)));
+      } catch {
+        /* best-effort */
+      }
+      try {
+        await self.registration.unregister();
+      } catch {
+        /* best-effort */
+      }
+      try {
+        const clients = await self.clients.matchAll();
+        for (const client of clients) {
+          client.navigate(client.url);
+        }
+      } catch {
+        /* best-effort */
+      }
+    })()
   );
 });
 
-self.addEventListener("fetch", (event) => {
-  const { request } = event;
-  if (request.method !== "GET") return;
-
-  const url = new URL(request.url);
-  if (url.origin !== self.location.origin) return; // leave cross-origin alone
-
-  const isNavigation =
-    request.mode === "navigate" ||
-    (request.headers.get("accept") || "").includes("text/html");
-
-  if (isNavigation) {
-    // network-first, fall back to cached shell
-    event.respondWith(
-      fetch(request)
-        .then((res) => {
-          const copy = res.clone();
-          caches.open(CACHE).then((cache) => cache.put(request, copy));
-          return res;
-        })
-        .catch(() => caches.match(request).then((hit) => hit || caches.match("/")))
-    );
-    return;
-  }
-
-  // other same-origin static assets: cache-first with runtime caching
-  event.respondWith(
-    caches.match(request).then((hit) => {
-      if (hit) return hit;
-      return fetch(request).then((res) => {
-        if (res && res.ok && res.type === "basic") {
-          const copy = res.clone();
-          caches.open(CACHE).then((cache) => cache.put(request, copy));
-        }
-        return res;
-      });
-    })
-  );
+/* Pure pass-through: never call event.respondWith, so every request hits the
+ * network and no asset is ever served from cache. */
+self.addEventListener("fetch", () => {
+  /* intentionally empty */
 });
